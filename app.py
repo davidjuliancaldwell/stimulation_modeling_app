@@ -1,29 +1,37 @@
 import dash
+from dash.dependencies import Input, Output
 import dash_core_components as dcc
 import dash_html_components as html
-import numpy as np
-import plotly as plotly
-import os
+from pandas_datareader import data as web
+from datetime import datetime as dt
 
-app = dash.Dash(__name__)
-server = app.server
-
-app.css.append_css({"external_url": "https://codepen.io/chriddyp/pen/bWLwgP.css"})
+app = dash.Dash()
 
 app.layout = html.Div([
-    html.H2('Hello World'),
+    html.H1('Stock Tickers'),
     dcc.Dropdown(
-        id='dropdown',
-        options=[{'label': i, 'value': i} for i in ['LA', 'NYC', 'MTL']],
-        value='LA'
+        id='my-dropdown',
+        options=[
+            {'label': 'Coke', 'value': 'COKE'},
+            {'label': 'Tesla', 'value': 'TSLA'},
+            {'label': 'Apple', 'value': 'AAPL'}
+        ],
+        value='COKE'
     ),
-    html.Div(id='display-value')
+    dcc.Graph(id='my-graph')
 ])
 
-@app.callback(dash.dependencies.Output('display-value', 'children'),
-              [dash.dependencies.Input('dropdown', 'value')])
-def display_value(value):
-    return 'You have selected "{}"'.format(value)
+@app.callback(Output('my-graph', 'figure'), [Input('my-dropdown', 'value')])
+def update_graph(selected_dropdown_value):
+    df = web.DataReader(
+        selected_dropdown_value, data_source='google',
+        start=dt(2017, 1, 1), end=dt.now())
+    return {
+        'data': [{
+            'x': df.index,
+            'y': df.Close
+        }]
+    }
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server()
