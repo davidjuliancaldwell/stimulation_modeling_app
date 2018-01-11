@@ -31,7 +31,7 @@ Ez_minus = np.zeros((1001,1001))
 
 for k in range(0,1001):
     x= np.float32(x_offset+(k)*0.00001)
-    for j in range(0,10):
+    for j in range(0,50):
         #import pdb;pdb.set_trace()
 
         z=z_offset+(j)*0.00001
@@ -67,7 +67,7 @@ for k in range(0,1001):
 
 for k in range(0,1001):
     x=np.float32(x_offset+(k)*0.00001)
-    for j in range(10,1001):
+    for j in range(50,1001):
         z=z_offset+(j)*0.00001
         r=np.sqrt(x**2+z**2)
 
@@ -102,5 +102,5 @@ for j in np.arange(0,1001):
     Ez_minus[:,1000-j]=-Ez[:,j]
 
 E=np.sqrt((Ex+Ex_minus)**2+(Ez+Ez_minus)**2)
-file = open('test_E_10.npy','wb')
+file = open('test_E_50.npy','wb')
 np.save(file,E)
