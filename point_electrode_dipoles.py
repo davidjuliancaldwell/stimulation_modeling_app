@@ -31,7 +31,7 @@ Ez_minus = np.zeros((1001,1001))
 
 for k in range(0,1001):
     x= np.float32(x_offset+(k)*0.00001)
-    for j in range(0,100):
+    for j in range(0,10):
         #import pdb;pdb.set_trace()
 
         z=z_offset+(j)*0.00001
@@ -67,7 +67,7 @@ for k in range(0,1001):
 
 for k in range(0,1001):
     x=np.float32(x_offset+(k)*0.00001)
-    for j in range(100,1001):
+    for j in range(10,1001):
         z=z_offset+(j)*0.00001
         r=np.sqrt(x**2+z**2)
 

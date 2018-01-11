@@ -5,6 +5,7 @@ import numpy as np
 import plotly as plotly
 import plotly.graph_objs as go
 import os
+import pandas as pd
 
 app = dash.Dash(__name__)
 server = app.server
@@ -15,6 +16,8 @@ app.css.append_css({"external_url": "https://codepen.io/chriddyp/pen/bWLwgP.css"
 data_test_100 = np.flipud(np.load('test_E_100.npy'))
 data_test_10 = np.flipud(np.load('test_E_10.npy'))
 
+dataFrame = {'data_10':data_test_10,'data_100':data_test_100}
+
 app.layout = html.Div([
     html.Div([
     html.H2('Visualization of Theoretical Dipole Stimulation'),
@@ -22,8 +25,8 @@ app.layout = html.Div([
 
     dcc.Dropdown(
                 id='type_stim',
-                options=[{'label': i, 'value': i} for i in ['data_test_10','data_test_100']],
-                value='data_test_100'
+                options=[{'label': i, 'value': i} for i in dataFrame.keys()],
+                value='data_100'
                 ),
     html.Hr(),
 
@@ -51,11 +54,12 @@ app.layout = html.Div([
     dash.dependencies.Input('max_val', 'value')])
 def update_figure(data_input,selected_max):
     maximum_val = int(selected_max)
+    data_input_select = dataFrame[data_input]
     return {
         'data': [
             #go.Contour([data])
             go.Heatmap(
-                z=data_input,
+                z=data_input_select,
              colorscale='jet',
              zauto = 'false',
              zmin=0,
@@ -67,8 +71,6 @@ def update_figure(data_input,selected_max):
         title='Plots of simulated field effects',
         )
     }
-
-@app
 
 if __name__ == '__main__':
     app.run_server(debug=True)
