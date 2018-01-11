@@ -98,9 +98,9 @@ for k in range(0,1001):
         Ez[j,k]=Eoz+Czob1+Czob2
 
 for j in np.arange(0,1001):
-    Ex_minus[:,1001-j]=Ex[:,j]
-    Ez_minus[:,1001-j]=-Ez[:,j]
+    Ex_minus[:,1000-j]=Ex[:,j]
+    Ez_minus[:,1000-j]=-Ez[:,j]
 
 E=np.sqrt((Ex+Ex_minus)**2+(Ez+Ez_minus)**2)
-plt.figure()
-plt.imshow(E)
+file = open('test_E_10.npy','wb')
+np.save(file,E)
