@@ -119,7 +119,7 @@ q = Queue(connection=conn)
     [dash.dependencies.State('load-data-box', 'value')])
 def clean_data(n_clicks,value):
      # some expensive clean data step
-     data = q.enqueue(theoretical_funcs_numba.point_electrode_dipoles,value)
+     data = q.enqueue('theoretical_funcs_numba.point_electrode_dipoles',value)
     # print(data)
      computed_data = np.flipud(data)
      #computed_data = np.flipud(theoretical_funcs_numba.point_electrode_dipoles(value))
