@@ -113,18 +113,16 @@ app.layout = html.Div([
 
 q = Queue(connection=conn)
 
-#@app.callback(
-#    dash.dependencies.Output('computed_data', 'children'),
-#    [dash.dependencies.Input('button','n_clicks')],
-#    [dash.dependencies.State('load-data-box', 'value')])
-#def clean_data(n_clicks,value):
-    # data = q.enqueue_call(func=point_electrode_dipoles,args=(value,),timeout=600)
-    # print(data)
-    # computed_data = q.enqueue_call(func = np.flipud,args=(data,),depends_on=data)
-    # time.sleep(60)
-
-     #computed_data = np.flipud(theoretical_funcs_numba.point_electrode_dipoles(value))
-#     return json.dumps(computed_data.tolist()) # or, more generally, json.dumps(cleaned_df)
+@app.callback(
+   dash.dependencies.Output('computed_data', 'children'),
+   [dash.dependencies.Input('button','n_clicks')],
+   [dash.dependencies.State('load-data-box', 'value')])
+def clean_data(n_clicks,value):
+    data = q.enqueue_call(func=point_electrode_dipoles,args=(value,),timeout=600)
+    computed_data = q.enqueue_call(func = np.flipud,args=(data,),depends_on=data)
+    time.sleep(60)
+    computed_data = np.flipud(theoretical_funcs_numba.point_electrode_dipoles(value))
+    return json.dumps(computed_data.tolist()) # or, more generally, json.dumps(cleaned_df)
 
 @app.callback(
     dash.dependencies.Output('heatmap_efield', 'figure'),
