@@ -120,7 +120,8 @@ q = Queue(connection=conn)
     [dash.dependencies.State('load-data-box', 'value')])
 def clean_data(n_clicks,value):
      # some expensive clean data step
-     data = q.enqueue_call(func=point_electrode_dipoles,args=(value,),timeout=5m )
+     print(value)
+     data = q.enqueue_call(func=point_electrode_dipoles,args=(value,),timeout='5m')
      time.sleep(60)
     # print(data)
      computed_data = np.flipud(data)
