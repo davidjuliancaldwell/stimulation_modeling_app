@@ -125,7 +125,7 @@ def pass_data(data):
    [dash.dependencies.State('load-data-box', 'value')])
 def clean_data(n_clicks,value):
     computed_data = q.enqueue(point_electrode_dipoles,value)
-    time.sleep(20)
+    time.sleep(29)
     return json.dumps(computed_data.result) # or, more generally, json.dumps(cleaned_df)
 @app.callback(
     dash.dependencies.Output('heatmap_efield', 'figure'),
