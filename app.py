@@ -20,44 +20,55 @@ app.css.append_css({"external_url": "https://codepen.io/chriddyp/pen/bWLwgP.css"
 
 data_test_100 = np.flipud(np.load('test_E_100.npy'))
 data_test_10 = np.flipud(np.load('test_E_10.npy'))
+data_test_20 = np.flipud(np.load('test_E_20.npy'))
 data_test_50 = np.flipud(np.load('test_E_50.npy'))
 
-dataFrame = {'csf_1_mm':data_test_10,'csf_5_mm':data_test_50,'csf_10_mm':data_test_100}
+dataFrame = {'csf_1_mm':data_test_10,'csf_2_mm':data_test_20,'csf_5_mm':data_test_50,'csf_10_mm':data_test_100}
 
 app.layout = html.Div([
     #html.Div([
     html.H2('Visualization of Theoretical Dipole Stimulation'),
     html.Hr(),
-
-    dcc.Dropdown(
-                id='type_stim',
-                options=[{'label': i, 'value': i} for i in dataFrame.keys()],
-                value='csf_10_mm'
-                ),
-    html.Div(children='Dropdown menu to select CSF thickness of interest', style={
-        'textAlign': 'center',
-        'color': colors['text']
-    }),
-    dcc.Input(
-        id='x_cord',
-        placeholder='Enter an X cord value...',
-        type='number',
-        value=500
-    ),
-        html.Div(children='Dropdown menu to select x coord', style={
+    html.Div([
+        html.Div([
+        dcc.Dropdown(
+                    id='type_stim',
+                    options=[{'label': i, 'value': i} for i in dataFrame.keys()],
+                    value='csf_10_mm'
+                    ),
+        html.Div(children='Dropdown menu to select CSF thickness of interest', style={
             'textAlign': 'center',
             'color': colors['text']
         }),
-    dcc.Input(
-        id='z_cord',
-        placeholder='Enter a z cord value...',
-        type='number',
-        value=500
-    ),
-    html.Div(children='Dropdown menu to select z coord', style={
-        'textAlign': 'center',
-        'color': colors['text']
-    }),
+        ],style={'width': '49%', 'display': 'inline-block'}),
+
+        html.Div([
+        html.Div([
+        dcc.Input(
+            id='x_cord',
+            placeholder='Enter an X cord value...',
+            type='number',
+            value=500
+        ),
+        ]),
+            html.Div(children='Enter value to select x coord', style={
+                'textAlign': 'center',
+                'color': colors['text'],
+            }),
+        html.Div([
+        dcc.Input(
+            id='z_cord',
+            placeholder='Enter a z cord value...',
+            type='number',
+            value=500
+        ),
+        ]),
+        html.Div(children='Enter value to select z coord', style={
+            'textAlign': 'center',
+            'color': colors['text']
+        }),
+        ],style={'width': '49%', 'display': 'inline-block', 'float':'right'}),
+    ]),
 
     html.Hr(),
     html.Div([
@@ -82,8 +93,6 @@ app.layout = html.Div([
         marks={i: '{}'.format(i) for i in range(0,1101,50)},),
         style={'width': '49%', 'padding': '0px 20px 20px 20px'}
     ),
-
-
     ])
     #],
     #style = {'display': 'inline-block', 'width': '48%'})
@@ -132,8 +141,8 @@ def update_x(data_input,x_cord_val):
         ],
         'layout': go.Layout(
         xaxis={'title':'x dimension'},
-        yaxis={'title': 'depth'},
-        title='Plots of simulated field effects',
+        yaxis={'title': 'Magnitude of electric field'},
+        title='E-field slice in z dimension',
         height= 225,
         margin= {'l': 40, 'b': 40, 'r': 40, 't': 40},
         )
@@ -155,9 +164,9 @@ def update_z(data_input,z_cord_val):
                 y= data_z)
         ],
         'layout': go.Layout(
-        xaxis={'title':'x dimension'},
-        yaxis={'title': 'depth'},
-        title='Plots of simulated field effects',
+        xaxis={'title':'z dimension'},
+        yaxis={'title': 'Magnitude of field'},
+        title='E-field slice in x dimension',
         height = 225,
         margin = {'l': 40, 'b': 40, 'r': 40, 't': 40},
         )
