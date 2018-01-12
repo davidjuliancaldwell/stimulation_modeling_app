@@ -10,7 +10,7 @@ import json
 from rq import Queue
 from worker import conn
 
-q = Queue(connection=conn)
+#q = Queue(connection=conn)
 
 app = dash.Dash(__name__)
 server = app.server
@@ -118,9 +118,10 @@ app.layout = html.Div([
     [dash.dependencies.State('load-data-box', 'value')])
 def clean_data(n_clicks,value):
      # some expensive clean data step
-     data = q.enqueue(theoretical_funcs_numba.point_electrode_dipoles,value)
-     computed_data = np.flipud(data)
-     #computed_data = np.flipud(theoretical_funcs_numba.point_electrode_dipoles(value))
+    # data = q.enqueue(theoretical_funcs_numba.point_electrode_dipoles,value)
+    # print(data)
+     #computed_data = np.flipud(data)
+     computed_data = np.flipud(theoretical_funcs_numba.point_electrode_dipoles(value))
      return json.dumps(computed_data.tolist()) # or, more generally, json.dumps(cleaned_df)
 
 @app.callback(
