@@ -31,7 +31,7 @@ Ez_minus = np.zeros((1001,1001))
 
 for k in range(0,1001):
     x= np.float32(x_offset+(k)*0.00001)
-    for j in range(0,50):
+    for j in range(0,20):
         #import pdb;pdb.set_trace()
 
         z=z_offset+(j)*0.00001
@@ -44,12 +44,20 @@ for k in range(0,1001):
         ex[j,k]=Eox
         ez[j,k]=Eoz
 
-        for n in range(0,50):
-            m=n-1
-            cx1[n,0]=(x*K21**(n+1)/((2*(n+1)*h-z)**2+x**2)**1.5)
-            cx2[n,0]=(x*K21**(n+1)/((2*(n+1)*h+z)**2+x**2)**1.5)
-            cz1[n,0]=(-(2*(n+1)*h-z)*K21**(n+1)/((2*(n+1)*h-z)**2+x**2)**1.5)
-            cz2[n,0]=((2*(n+1)*h+z)*K21**(n+1)/((2*(n+1)*h+z)**2+x**2)**1.5)
+        n = np.arange(0,50)
+        m = n-1
+        cx1 = (x*K21**(n+1)/((2*(n+1)*h-z)**2+x**2)**1.5)
+        cx2 =(x*K21**(n+1)/((2*(n+1)*h+z)**2+x**2)**1.5)
+        cz1 = (-(2*(n+1)*h-z)*K21**(n+1)/((2*(n+1)*h-z)**2+x**2)**1.5)
+        cz2 = ((2*(n+1)*h+z)*K21**(n+1)/((2*(n+1)*h+z)**2+x**2)**1.5)
+
+        #
+        # for n in range(0,50):
+        #     m=n-1
+        #     cx1[n,0]=(x*K21**(n+1)/((2*(n+1)*h-z)**2+x**2)**1.5)
+        #     cx2[n,0]=(x*K21**(n+1)/((2*(n+1)*h+z)**2+x**2)**1.5)
+        #     cz1[n,0]=(-(2*(n+1)*h-z)*K21**(n+1)/((2*(n+1)*h-z)**2+x**2)**1.5)
+        #     cz2[n,0]=((2*(n+1)*h+z)*K21**(n+1)/((2*(n+1)*h+z)**2+x**2)**1.5)
 
         Cxo1=scale*np.sum(cx1)
         Cxo2=scale*np.sum(cx2)
@@ -67,7 +75,7 @@ for k in range(0,1001):
 
 for k in range(0,1001):
     x=np.float32(x_offset+(k)*0.00001)
-    for j in range(50,1001):
+    for j in range(20,1001):
         z=z_offset+(j)*0.00001
         r=np.sqrt(x**2+z**2)
 
@@ -77,12 +85,19 @@ for k in range(0,1001):
         ex[j,k]=Eox
         ez[j,k]=Eoz
 
-        for n in range(0,50):
-            m=n-0
-            cxb1[n]=(x*K21**(n+1)/((2*m*h+z)**2+x**2)**-1.5)
-            cxb2[n]=(x*K21**(n+1)/((2*(n+1)*h+z)**2+x**2)**-1.5)
-            czb1[n]=((2*m*h+z)*K21**(n+1)/((2*m*h+z)**2+x**2)**1.5)
-            czb2[n]=((2*(n+1)*h+z)*K21**(n+1)/((2*(n+1)*h+z)**2+x**2)**1.5)
+        n = np.arange(0,50)
+        m = n -0
+        cxb1 = (x*K21**(n+1)/((2*m*h+z)**2+x**2)**-1.5)
+        cxb2 = (x*K21**(n+1)/((2*(n+1)*h+z)**2+x**2)**-1.5)
+        czb1 = ((2*m*h+z)*K21**(n+1)/((2*m*h+z)**2+x**2)**1.5)
+        czb2 = ((2*(n+1)*h+z)*K21**(n+1)/((2*(n+1)*h+z)**2+x**2)**1.5)
+        #
+        # for n in range(0,50):
+        #     m=n-0
+        #     cxb1[n]=(x*K21**(n+1)/((2*m*h+z)**2+x**2)**-1.5)
+        #     cxb2[n]=(x*K21**(n+1)/((2*(n+1)*h+z)**2+x**2)**-1.5)
+        #     czb1[n]=((2*m*h+z)*K21**(n+1)/((2*m*h+z)**2+x**2)**1.5)
+        #     czb2[n]=((2*(n+1)*h+z)*K21**(n+1)/((2*(n+1)*h+z)**2+x**2)**1.5)
 
         Cxob1=scale*np.sum(cxb1)
         Cxob2=scale*np.sum(cxb2)
@@ -102,5 +117,5 @@ for j in np.arange(0,1001):
     Ez_minus[:,1000-j]=-Ez[:,j]
 
 E=np.sqrt((Ex+Ex_minus)**2+(Ez+Ez_minus)**2)
-file = open('test_E_50.npy','wb')
+file = open('test_E_20.npy','wb')
 np.save(file,E)
