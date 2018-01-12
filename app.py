@@ -114,19 +114,18 @@ app.layout = html.Div([
     #style = {'display': 'inline-block', 'width': '48%'})
 ######################
 
-def pass_data(data):
-     data_back = data
-     return data_back
-
-
 @app.callback(
    dash.dependencies.Output('computed_data', 'children'),
    [dash.dependencies.Input('button','n_clicks')],
    [dash.dependencies.State('load-data-box', 'value')])
 def clean_data(n_clicks,value):
     computed_data = q.enqueue(point_electrode_dipoles,value)
-    time.sleep(29)
-    return json.dumps(computed_data.result) # or, more generally, json.dumps(cleaned_df)
+    time.sleep(25)
+    temp = 1 + 1
+    time.sleep(25)
+    E = np.flipud(computed_data.result)
+    E_list = E.tolist()
+    return json.dumps(E_list) # or, more generally, json.dumps(cleaned_df)
 @app.callback(
     dash.dependencies.Output('heatmap_efield', 'figure'),
     [dash.dependencies.Input('computed_data', 'children'),

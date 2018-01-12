@@ -120,6 +120,4 @@ def point_electrode_dipoles(csf_thick):
         Ez_minus[:,1000-j]=-Ez[:,j]
 
     E=np.sqrt((Ex+Ex_minus)**2+(Ez+Ez_minus)**2)
-    E = np.flipud(E)
-    E_list = E.tolist()
-    return E_list
+    return E
