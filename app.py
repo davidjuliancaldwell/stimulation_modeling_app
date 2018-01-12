@@ -121,10 +121,11 @@ q = Queue(connection=conn)
 def clean_data(n_clicks,value):
      # some expensive clean data step
      print(value)
-     data = q.enqueue_call(func=point_electrode_dipoles,args=(value,),timeout='5m')
-     time.sleep(60)
+     data = q.enqueue_call(func=point_electrode_dipoles,args=(value,),timeout=600)
     # print(data)
-     computed_data = np.flipud(data)
+     computed_data = q.enqueue_call(func = np.flipud,args=(data,),depends_on=data)
+     time.sleep(60)
+
      #computed_data = np.flipud(theoretical_funcs_numba.point_electrode_dipoles(value))
      return json.dumps(computed_data.tolist()) # or, more generally, json.dumps(cleaned_df)
 
