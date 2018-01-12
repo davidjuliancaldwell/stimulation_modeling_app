@@ -5,10 +5,11 @@ import numpy as np
 import plotly as plotly
 import plotly.graph_objs as go
 import os
-import theoretical_funcs_numba
+from theoretical_funcs_numba import point_electrode_dipoles
 import json
 from rq import Queue
 from worker import conn
+import time
 
 app = dash.Dash(__name__)
 server = app.server
@@ -119,7 +120,8 @@ q = Queue(connection=conn)
     [dash.dependencies.State('load-data-box', 'value')])
 def clean_data(n_clicks,value):
      # some expensive clean data step
-     data = q.enqueue('theoretical_funcs_numba.point_electrode_dipoles',value)
+     data = q.enqueue_call(func=point_electrode_dipoles,args=(value,),timeout=5m )
+     time.sleep(60)
     # print(data)
      computed_data = np.flipud(data)
      #computed_data = np.flipud(theoretical_funcs_numba.point_electrode_dipoles(value))
