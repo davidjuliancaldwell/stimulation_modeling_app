@@ -10,7 +10,7 @@ import json
 from rq import Queue
 from worker import conn
 
-Q = Queue(connection=conn)
+q = Queue(connection=conn)
 
 app = dash.Dash(__name__)
 server = app.server
