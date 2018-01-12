@@ -33,11 +33,11 @@ def point_electrode_dipoles(csf_thick):
     Ez_minus = np.zeros((1001,1001))
 
     for k in range(0,1001):
-        x= np.float64(x_offset+(k)*0.00001)
+        x= np.float32(x_offset+(k)*0.00001)
         for j in range(0,csf_thick):
             #import pdb;pdb.set_trace()
 
-            z=np.float64(z_offset+(j)*0.00001)
+            z=z_offset+(j)*0.00001
             #print(type(z))
             r=np.sqrt(x**2+z**2)
 
@@ -120,4 +120,6 @@ def point_electrode_dipoles(csf_thick):
         Ez_minus[:,1000-j]=-Ez[:,j]
 
     E=np.sqrt((Ex+Ex_minus)**2+(Ez+Ez_minus)**2)
-    return E
+    E = np.flipud(E)
+    E_list = E.tolist()
+    return E_list

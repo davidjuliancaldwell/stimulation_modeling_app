@@ -14,6 +14,9 @@ import time
 app = dash.Dash(__name__)
 server = app.server
 
+q = Queue('high',connection=conn)
+
+
 colors = {
     'text': '#7FDBFF'
 }
@@ -111,19 +114,19 @@ app.layout = html.Div([
     #style = {'display': 'inline-block', 'width': '48%'})
 ######################
 
-q = Queue(connection=conn)
+def pass_data(data):
+     data_back = data
+     return data_back
+
 
 @app.callback(
    dash.dependencies.Output('computed_data', 'children'),
    [dash.dependencies.Input('button','n_clicks')],
    [dash.dependencies.State('load-data-box', 'value')])
 def clean_data(n_clicks,value):
-    data = q.enqueue_call(func=point_electrode_dipoles,args=(value,),timeout=600)
-    computed_data = q.enqueue_call(func = np.flipud,args=(data,),depends_on=data)
-    time.sleep(60)
-    computed_data = np.flipud(theoretical_funcs_numba.point_electrode_dipoles(value))
-    return json.dumps(computed_data.tolist()) # or, more generally, json.dumps(cleaned_df)
-
+    computed_data = q.enqueue(point_electrode_dipoles,value)
+    time.sleep(20)
+    return json.dumps(computed_data.result) # or, more generally, json.dumps(cleaned_df)
 @app.callback(
     dash.dependencies.Output('heatmap_efield', 'figure'),
     [dash.dependencies.Input('computed_data', 'children'),
