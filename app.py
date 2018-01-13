@@ -120,9 +120,11 @@ app.layout = html.Div([
    [dash.dependencies.State('load-data-box', 'value')])
 def clean_data(n_clicks,value):
     computed_data = q.enqueue(point_electrode_dipoles,value)
-    time.sleep(25)
-    time.sleep(25)
-    time.sleep(25)
+    time.sleep(15)
+    temp = 1+1
+    time.sleep(15)
+    temp = 1+1
+    time.sleep(15)
     E = np.flipud(computed_data.result)
     E_list = E.tolist()
     return json.dumps(E_list) # or, more generally, json.dumps(cleaned_df)
