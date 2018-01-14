@@ -61,7 +61,7 @@ app.layout = html.Div([
             id='x_cord',
             placeholder='Enter an X cord value...',
             type='number',
-            value=500
+            value=2
         ),
         ]),
             html.Div(children='Enter value to select x coord', style={
@@ -73,7 +73,7 @@ app.layout = html.Div([
             id='z_cord',
             placeholder='Enter a z cord value...',
             type='number',
-            value=500
+            value=2
         ),
         ]),
         html.Div(children='Enter value to select z coord', style={
@@ -120,11 +120,11 @@ app.layout = html.Div([
    [dash.dependencies.State('load-data-box', 'value')])
 def clean_data(n_clicks,value):
     computed_data = q.enqueue(point_electrode_dipoles,value)
-    time.sleep(15)
-    temp = 1+1
-    time.sleep(15)
-    temp = 1+1
-    time.sleep(15)
+    time.sleep(10)
+    # temp = 1+1
+    # time.sleep(15)
+    # temp = 1+1
+    # time.sleep(15)
     E = np.flipud(computed_data.result)
     E_list = E.tolist()
     return json.dumps(E_list) # or, more generally, json.dumps(cleaned_df)
