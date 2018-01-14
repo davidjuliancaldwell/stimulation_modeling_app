@@ -61,7 +61,7 @@ app.layout = html.Div([
             id='x_cord',
             placeholder='Enter an X cord value...',
             type='number',
-            value=2
+            value=500
         ),
         ]),
             html.Div(children='Enter value to select x coord', style={
@@ -73,7 +73,7 @@ app.layout = html.Div([
             id='z_cord',
             placeholder='Enter a z cord value...',
             type='number',
-            value=2
+            value=500
         ),
         ]),
         html.Div(children='Enter value to select z coord', style={
@@ -120,7 +120,7 @@ app.layout = html.Div([
    [dash.dependencies.State('load-data-box', 'value')])
 def clean_data(n_clicks,value):
     computed_data = q.enqueue(point_electrode_dipoles,value)
-    time.sleep(10)
+    time.sleep(20)
     # temp = 1+1
     # time.sleep(15)
     # temp = 1+1
