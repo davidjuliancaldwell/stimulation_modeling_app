@@ -5,7 +5,8 @@ import numpy as np
 import plotly as plotly
 import plotly.graph_objs as go
 import os
-from theoretical_funcs_numba import point_electrode_dipoles
+from theoretical_funcs_numba_sub import point_electrode_dipoles_sub
+from theoretical_funcs_numba_sub import finish_calc
 import json
 from rq import Queue
 from worker import conn
@@ -13,9 +14,6 @@ import time
 
 app = dash.Dash(__name__)
 server = app.server
-
-q = Queue('high',connection=conn)
-
 
 colors = {
     'text': '#7FDBFF'
@@ -119,15 +117,47 @@ app.layout = html.Div([
    [dash.dependencies.Input('button','n_clicks')],
    [dash.dependencies.State('load-data-box', 'value')])
 def clean_data(n_clicks,value):
-    computed_data = q.enqueue(point_electrode_dipoles,value)
-    time.sleep(27)
-    # temp = 1+1
-    # time.sleep(15)
-    # temp = 1+1
-    # time.sleep(15)
-    E = np.flipud(computed_data.result)
-    E_list = E.tolist()
-    return json.dumps(E_list) # or, more generally, json.dumps(cleaned_df)
+    k_min = [0,500]
+    k_max = [500,1001]
+    #k_min = [0,500]
+    #k_max = [500,1001]
+    Ex = np.zeros((1001,1001))
+    Ez = np.zeros((1001,1001))
+    Ex_minus =np.zeros((1001,1001))
+    Ez_minus = np.zeros((1001,1001))
+
+    list_ks = list(zip(k_min,k_max))
+
+    #for i in range(len(k_min)):
+    q = Queue('high',connection=conn)
+
+    computed_data = q.enqueue(point_electrode_dipoles_sub,Ex,Ez,value,list_ks[0][0],list_ks[0][1])
+    computed_data_2 = point_electrode_dipoles_sub(Ex,Ez,value,list_ks[1][0],list_ks[1][1])
+
+    while True:
+        if computed_data.result is not None:
+            results = computed_data.result
+            #print(results)
+            Ex[:,list_ks[0][0]:list_ks[0][1]] = results[0]
+            Ez[:,list_ks[0][0]:list_ks[0][1]] = results[1]
+
+            Ex[:,list_ks[1][0]:list_ks[1][1]] = computed_data_2[0]
+            Ez[:,list_ks[1][0]:list_ks[1][1]] = computed_data_2[1]
+
+
+            for j in np.arange(0,1001):
+                Ex_minus[:,1000-j]=Ex[:,j]
+                Ez_minus[:,1000-j]=-Ez[:,j]
+
+            E_field=np.sqrt((Ex+Ex_minus)**2+(Ez+Ez_minus)**2)
+
+            #finished = q.enqueue(finish_calc,Ex,Ex_minus,Ez,Ez_minus)
+            E = np.flipud(E_field)
+            #E = np.flipud(computed_data.result)
+
+            E_list = E.tolist()
+            return json.dumps(E_list) # or, more generally, json.dumps(cleaned_df)
+
 @app.callback(
     dash.dependencies.Output('heatmap_efield', 'figure'),
     [dash.dependencies.Input('computed_data', 'children'),
