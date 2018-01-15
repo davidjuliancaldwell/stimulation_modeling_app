@@ -6,7 +6,7 @@ import plotly as plotly
 import plotly.graph_objs as go
 import os
 from theoretical_funcs_numba_sub import point_electrode_dipoles_sub
-from theoretical_funcs_numba_sub import finish_calc
+#from theoretical_funcs_numba_sub import finish_calc
 import json
 from rq import Queue
 from worker import conn
