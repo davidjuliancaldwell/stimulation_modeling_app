@@ -5,7 +5,7 @@ import numpy as np
 import plotly as plotly
 import plotly.graph_objs as go
 import os
-#from theoretical_funcs_numba_sub import point_electrode_dipoles_sub
+from theoretical_funcs_numba_sub import point_electrode_dipoles_sub
 import json
 from rq import Queue
 from worker import conn
@@ -13,90 +13,13 @@ import time
 
 app = dash.Dash(__name__)
 server = app.server
+q = Queue('high',connection=conn)
 
 colors = {
     'text': '#7FDBFF'
 }
 
 app.css.append_css({"external_url": "https://codepen.io/chriddyp/pen/bWLwgP.css"})
-
-############
-from numba import jit
-
-h=0.001
-i0=1e-3
-rho1=0.5
-rho2=2.5
-K21=(rho2-rho1)/(rho2+rho1)
-scale=(i0*rho1)/(2*np.pi)
-x_offset=0
-z_offset=0
-
-cx1 = np.zeros((50,1))
-cx2 = np.zeros((50,1))
-cz1 = np.zeros((50,1))
-cz2 = np.zeros((50,1))
-
-cxb1 = np.zeros((50,1))
-czb1 = np.zeros((50,1))
-cxb2 = np.zeros((50,1))
-czb2 = np.zeros((50,1))
-
-Ex_minus =np.zeros((1001,1001))
-Ez_minus = np.zeros((1001,1001))
-
-@jit(error_model='numpy')
-def point_electrode_dipoles_sub(Ex,Ez,csf_thick,k_min,k_max):
-    for k in range(k_min,k_max):
-        x= np.float32(x_offset+(k)*0.00001)
-        for j in range(0,csf_thick):
-
-            z=z_offset+(j)*0.00001
-            Eox=x*scale/(x**2+z**2)**1.5
-            Eoz=z*scale/(x**2+z**2)**1.5
-            #
-            n = np.arange(0,50)
-            m = n-1
-            cx1 = (x*K21**(n+1)/((2*(n+1)*h-z)**2+x**2)**1.5)
-            cx2 =(x*K21**(n+1)/((2*(n+1)*h+z)**2+x**2)**1.5)
-            cz1 = (-(2*(n+1)*h-z)*K21**(n+1)/((2*(n+1)*h-z)**2+x**2)**1.5)
-            cz2 = ((2*(n+1)*h+z)*K21**(n+1)/((2*(n+1)*h+z)**2+x**2)**1.5)
-
-            Cxo1=scale*np.sum(cx1)
-            Cxo2=scale*np.sum(cx2)
-            Czo1=scale*np.sum(cz1)
-            Czo2=scale*np.sum(cz2)
-
-            Ex[j,k]=Eox+Cxo1+Cxo2
-            Ez[j,k]=Eoz+Czo1+Czo2
-
-    for k in range(k_min,k_max):
-        x=np.float32(x_offset+(k)*0.00001)
-        for j in range(csf_thick,1001):
-            z=z_offset+(j)*0.00001
-
-            Eox=x*scale/(x**2+z**2)**1.5
-            Eoz=z*scale/(x**2+z**2)**1.5
-
-            n = np.arange(0,50)
-            m = n -0
-            cxb1 = (x*K21**(n+1)/((2*m*h+z)**2+x**2)**-1.5)
-            cxb2 = (x*K21**(n+1)/((2*(n+1)*h+z)**2+x**2)**-1.5)
-            czb1 = ((2*m*h+z)*K21**(n+1)/((2*m*h+z)**2+x**2)**1.5)
-            czb2 = ((2*(n+1)*h+z)*K21**(n+1)/((2*(n+1)*h+z)**2+x**2)**1.5)
-            #
-            Cxob1=scale*np.sum(cxb1)
-            Cxob2=scale*np.sum(cxb2)
-            Czob1=scale*np.sum(czb1)
-            Czob2=scale*np.sum(czb2)
-
-            Ex[j,k]=Eox+Cxob1+Cxob2
-            Ez[j,k]=Eoz+Czob1+Czob2
-
-    Ex_return = Ex[:,k_min:k_max]
-    Ez_return = Ez[:,k_min:k_max]
-    return Ex_return, Ez_return
-
 
 #############
 # bring in the data
@@ -195,46 +118,41 @@ app.layout = html.Div([
    [dash.dependencies.Input('button','n_clicks')],
    [dash.dependencies.State('load-data-box', 'value')])
 def clean_data(n_clicks,value):
-    k_min = [0,900]
-    k_max = [900,1001]
-    #k_min = [0,500]
-    #k_max = [500,1001]
+    #k_min = [0,900]
+    #k_max = [900,1001]
+    k_min = [0]
+    k_max = [1001]
     Ex = np.zeros((1001,1001))
     Ez = np.zeros((1001,1001))
     Ex_minus =np.zeros((1001,1001))
     Ez_minus = np.zeros((1001,1001))
-
     list_ks = list(zip(k_min,k_max))
 
     #for i in range(len(k_min)):
-    q = Queue('high',connection=conn)
-
+    #    still_compute = True
+    still_compute = True
     computed_data = q.enqueue(point_electrode_dipoles_sub,Ex,Ez,value,list_ks[0][0],list_ks[0][1])
-    computed_data_2 = point_electrode_dipoles_sub(Ex,Ez,value,list_ks[1][0],list_ks[1][1])
+        #computed_data_2 = point_electrode_dipoles_sub(Ex,Ez,value,list_ks[1][0],list_ks[1][1])
 
-    while True:
+    while still_compute is True:
         if computed_data.result is not None:
-            results = computed_data.result
-            #print(results)
-            Ex[:,list_ks[0][0]:list_ks[0][1]] = results[0]
-            Ez[:,list_ks[0][0]:list_ks[0][1]] = results[1]
+            Ex[:,list_ks[0][0]:list_ks[0][1]] = computed_data.result[0]
+            Ez[:,list_ks[0][0]:list_ks[0][1]] = computed_data.result[1]
+            still_compute = False
 
-            Ex[:,list_ks[1][0]:list_ks[1][1]] = computed_data_2[0]
-            Ez[:,list_ks[1][0]:list_ks[1][1]] = computed_data_2[1]
+                    #Ex[:,list_ks[1][0]:list_ks[1][1]] = computed_data_2[0]
+                    #Ez[:,list_ks[1][0]:list_ks[1][1]] = computed_data_2[1]
+    for j in np.arange(0,1001):
+        Ex_minus[:,1000-j]=Ex[:,j]
+        Ez_minus[:,1000-j]=-Ez[:,j]
 
+    E_field=np.sqrt((Ex+Ex_minus)**2+(Ez+Ez_minus)**2)
 
-            for j in np.arange(0,1001):
-                Ex_minus[:,1000-j]=Ex[:,j]
-                Ez_minus[:,1000-j]=-Ez[:,j]
-
-            E_field=np.sqrt((Ex+Ex_minus)**2+(Ez+Ez_minus)**2)
-
-            #finished = q.enqueue(finish_calc,Ex,Ex_minus,Ez,Ez_minus)
-            E = np.flipud(E_field)
-            #E = np.flipud(computed_data.result)
-
-            E_list = E.tolist()
-            return json.dumps(E_list) # or, more generally, json.dumps(cleaned_df)
+    #finished = q.enqueue(finish_calc,Ex,Ex_minus,Ez,Ez_minus)
+    E = np.flipud(E_field)
+    #E = np.flipud(computed_data.result)
+    E_list = E.tolist()
+    return json.dumps(E_list) # or, more generally, json.dumps(cleaned_df)
 
 @app.callback(
     dash.dependencies.Output('heatmap_efield', 'figure'),
