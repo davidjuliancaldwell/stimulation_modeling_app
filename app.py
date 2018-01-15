@@ -195,8 +195,8 @@ app.layout = html.Div([
    [dash.dependencies.Input('button','n_clicks')],
    [dash.dependencies.State('load-data-box', 'value')])
 def clean_data(n_clicks,value):
-    k_min = [0,700]
-    k_max = [700,1001]
+    k_min = [0,800]
+    k_max = [800,1001]
     #k_min = [0,500]
     #k_max = [500,1001]
     Ex = np.zeros((1001,1001))
