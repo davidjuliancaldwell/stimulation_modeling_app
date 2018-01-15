@@ -97,16 +97,6 @@ def point_electrode_dipoles_sub(Ex,Ez,csf_thick,k_min,k_max):
     Ez_return = Ez[:,k_min:k_max]
     return Ex_return, Ez_return
 
-@jit(error_model='numpy')
-def finish_calc(Ex,Ex_minuss,Ez,Ez_minus):
-    for j in np.arange(0,1001):
-        Ex_minus[:,1000-j]=Ex[:,j]
-        Ez_minus[:,1000-j]=-Ez[:,j]
-
-    E=np.sqrt((Ex+Ex_minus)**2+(Ez+Ez_minus)**2)
-    return E
-
-
 
 #############
 # bring in the data
@@ -205,8 +195,8 @@ app.layout = html.Div([
    [dash.dependencies.Input('button','n_clicks')],
    [dash.dependencies.State('load-data-box', 'value')])
 def clean_data(n_clicks,value):
-    k_min = [0,500]
-    k_max = [500,1001]
+    k_min = [0,700]
+    k_max = [700,1001]
     #k_min = [0,500]
     #k_max = [500,1001]
     Ex = np.zeros((1001,1001))
