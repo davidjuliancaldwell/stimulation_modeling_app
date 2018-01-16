@@ -7,14 +7,14 @@ import plotly.graph_objs as go
 import os
 #import theoretical_funcs_numba_sub
 import json
-#from rq import Queue
-#from worker import conn
+from rq import Queue
+from worker import conn
 import time
 from numba import jit
 
 app = dash.Dash(__name__)
 server = app.server
-#q = Queue('high',connection=conn)
+q = Queue('high',connection=conn)
 
 colors = {
     'text': '#7FDBFF'
@@ -131,19 +131,19 @@ def clean_data(n_clicks,value):
 
     #for i in range(len(k_min)):
     #    still_compute = True
-    #still_compute = True
-    #computed_data = q.enqueue(point_electrode_dipoles_sub,Ex,Ez,value,list_ks[0][0],list_ks[0][1])
-    computed_data = point_electrode_dipoles_sub(Ex,Ez,value,list_ks[0][0],list_ks[0][1])
+    still_compute = True
+    computed_data = q.enqueue(point_electrode_dipoles_sub,Ex,Ez,value,list_ks[0][0],list_ks[0][1])
+    #computed_data = point_electrode_dipoles_sub(Ex,Ez,value,list_ks[0][0],list_ks[0][1])
 
-    #while still_compute is True:
-    #    if computed_data.result is not None:
-    #Ex[:,list_ks[0][0]:list_ks[0][1]] = computed_data.result[0]
-    #Ez[:,list_ks[0][0]:list_ks[0][1]] = computed_data.result[1]
-    Ex[:,list_ks[0][0]:list_ks[0][1]] = computed_data[0]
-    Ez[:,list_ks[0][0]:list_ks[0][1]] = computed_data[1]
+    while still_compute is True:
+        if computed_data.result is not None:
+            Ex[:,list_ks[0][0]:list_ks[0][1]] = computed_data.result[0]
+            Ez[:,list_ks[0][0]:list_ks[0][1]] = computed_data.result[1]
+    #Ex[:,list_ks[0][0]:list_ks[0][1]] = computed_data[0]
+    #Ez[:,list_ks[0][0]:list_ks[0][1]] = computed_data[1]
 
 
-    #still_compute = False
+            still_compute = False
 
                     #Ex[:,list_ks[1][0]:list_ks[1][1]] = computed_data_2[0]
                     #Ez[:,list_ks[1][0]:list_ks[1][1]] = computed_data_2[1]
