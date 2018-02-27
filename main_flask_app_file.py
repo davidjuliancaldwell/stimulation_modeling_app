@@ -51,7 +51,15 @@ app.layout = html.Div([
             html.Div(dcc.Input(id='load-data-box', type='number',value=100)),
             html.Button('Submit', id='button',n_clicks=0),
             html.Div(id='output-container-button',
-                     children='Enter a value and press submit')
+                     children='Enter a value of CSF thickness in micrometers and press submit')
+        ]),
+        html.Div([
+            dcc.RadioItems(
+                id='axis_scale',
+                options=[{'label': i, 'value': i} for i in ['linear', 'log']],
+                value='linear',
+                labelStyle={'display': 'inline-block'}
+            )
         ]),
         ],style={'width': '49%', 'display': 'inline-block'}),
 
@@ -64,19 +72,19 @@ app.layout = html.Div([
             value=500
         ),
         ]),
-            html.Div(children='Enter value to select x coord', style={
+            html.Div(children='Enter value to select x coordinate (micrometers) between electrodes', style={
                 'textAlign': 'center',
                 'color': colors['text'],
             }),
         html.Div([
         dcc.Input(
             id='z_cord',
-            placeholder='Enter a z cord value...',
+            placeholder='Enter a depth coordinate...',
             type='number',
             value=500
         ),
         ]),
-        html.Div(children='Enter value to select z coord', style={
+        html.Div(children='Enter value to select depth coordinate (micrometers)', style={
             'textAlign': 'center',
             'color': colors['text']
         }),
@@ -103,7 +111,7 @@ app.layout = html.Div([
         min=0,
         max=1100,
         value=[0,500],
-        step=10,
+        step=5,
         marks={i: '{}'.format(i) for i in range(0,1101,50)},),
         style={'width': '49%', 'padding': '0px 20px 20px 20px'}
     ),
@@ -117,7 +125,8 @@ app.layout = html.Div([
 @app.callback(
    dash.dependencies.Output('computed_data', 'children'),
    [dash.dependencies.Input('button','n_clicks')],
-   [dash.dependencies.State('load-data-box', 'value')])
+   [dash.dependencies.State('load-data-box', 'value')],
+)
 def clean_data(n_clicks,value):
     #k_min = [0,900]
     #k_max = [900,1001]
@@ -162,11 +171,16 @@ def clean_data(n_clicks,value):
 @app.callback(
     dash.dependencies.Output('heatmap_efield', 'figure'),
     [dash.dependencies.Input('computed_data', 'children'),
-    dash.dependencies.Input('max_val', 'value')])
-def update_figure_compute(data_input,selected_range):
+    dash.dependencies.Input('max_val', 'value'),
+    dash.dependencies.Input('axis_scale','value')])
+def update_figure_compute(data_input,selected_range,axis_scale):
     maximum_val = int(selected_range[1])
     minimum_val = int(selected_range[0])
-    data_input_select = np.asarray(json.loads(data_input))
+    if axis_scale == 'log':
+        data_input_select = np.log(np.asarray(json.loads(data_input)))
+    else:
+        data_input_select = (np.asarray(json.loads(data_input)))
+
     return {
         'data': [
             #go.Contour([data])
@@ -189,9 +203,14 @@ def update_figure_compute(data_input,selected_range):
 @app.callback(
     dash.dependencies.Output('x-graph', 'figure'),
     [dash.dependencies.Input('computed_data', 'children'),
-    dash.dependencies.Input('x_cord','value')])
-def update_x_compute(data_input,x_cord_val):
-    data_input_select = np.asarray(json.loads(data_input))
+    dash.dependencies.Input('x_cord','value'),
+    dash.dependencies.Input('axis_scale','value')])
+def update_x_compute(data_input,x_cord_val,axis_scale):
+    if axis_scale == 'log':
+        data_input_select = np.log(np.asarray(json.loads(data_input)))
+    else:
+        data_input_select = (np.asarray(json.loads(data_input)))
+
     data_x = data_input_select[:,x_cord_val]
     indep_axis_x = len(data_x)
     return {
@@ -202,9 +221,9 @@ def update_x_compute(data_input,x_cord_val):
                 y=data_x)
         ],
         'layout': go.Layout(
-        xaxis={'title':'z dimension'},
+        xaxis={'title':'depth into brain'},
         yaxis={'title': 'Magnitude of electric field'},
-        title='E-field slice in x dimension',
+        title='E-field slice at a selected x value between electrodes',
         height= 225,
         margin= {'l': 40, 'b': 40, 'r': 40, 't': 40},
         )
@@ -213,26 +232,31 @@ def update_x_compute(data_input,x_cord_val):
 @app.callback(
     dash.dependencies.Output('z-graph', 'figure'),
     [dash.dependencies.Input('computed_data', 'children'),
-    dash.dependencies.Input('z_cord','value')])
-def update_z_compute(data_input,z_cord_val):
-        data_input_select = np.asarray(json.loads(data_input))
-        data_z= data_input_select[z_cord_val,:]
-        indep_axis_z = len(data_z)
-        return {
-        'data': [
-            #go.Contour([data])
-            go.Scatter(
-                x = indep_axis_z,
-                y= data_z)
-        ],
-        'layout': go.Layout(
-        xaxis={'title':'x dimension'},
-        yaxis={'title': 'Magnitude of field'},
-        title='E-field slice in z dimension',
-        height = 225,
-        margin = {'l': 40, 'b': 40, 'r': 40, 't': 40},
-        )
-    }
+    dash.dependencies.Input('z_cord','value'),
+    dash.dependencies.Input('axis_scale','value')])
+def update_z_compute(data_input,z_cord_val,axis_scale):
+    if axis_scale == 'log':
+        data_input_select = np.log(np.asarray(json.loads(data_input)))
+    else:
+        data_input_select = (np.asarray(json.loads(data_input)))
+
+    data_z= data_input_select[z_cord_val,:]
+    indep_axis_z = len(data_z)
+    return {
+    'data': [
+        #go.Contour([data])
+        go.Scatter(
+            x = indep_axis_z,
+            y= data_z)
+    ],
+    'layout': go.Layout(
+    xaxis={'title':'x dimension between electrodes'},
+    yaxis={'title': 'Magnitude of field'},
+    title='E-field slice at a selected depth value',
+    height = 225,
+    margin = {'l': 40, 'b': 40, 'r': 40, 't': 40},
+    )
+}
 
 
 #######################
